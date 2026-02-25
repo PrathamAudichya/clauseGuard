@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import UploadZone from '../components/UploadZone';
-import { ShieldAlert, FileText, Scale, History, Trash2, ChevronRight } from 'lucide-react';
+import { ShieldAlert, FileText, Scale, History, Trash2, ChevronRight, Zap, Lock, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
@@ -16,90 +16,133 @@ const HomePage: React.FC = () => {
         const items = keys.map(k => {
             try { return JSON.parse(localStorage.getItem(k) || ''); } catch (e) { return null; }
         }).filter(Boolean);
-
-        // Sort by descending roughly (we don't have a date field, but we can just show them)
         setHistory(items.slice(0, 5));
     };
 
     const clearHistory = () => {
-        if (window.confirm("Are you sure you want to clear your local analysis history?")) {
+        if (window.confirm("Clear all local analysis history?")) {
             const keys = Object.keys(localStorage).filter(k => k.startsWith('analysis_'));
             keys.forEach(k => localStorage.removeItem(k));
             setHistory([]);
         }
     };
 
+    const getRiskColor = (score: number) => {
+        if (score >= 70) return 'text-red-500 bg-red-50';
+        if (score >= 40) return 'text-amber-500 bg-amber-50';
+        return 'text-emerald-500 bg-emerald-50';
+    };
+
     return (
-        <div className="flex flex-col items-center justify-center py-10">
-            <div className="text-center max-w-3xl mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <h1 className="text-5xl font-extrabold text-brand-navy mb-4 leading-tight">
-                    Know What You Are Signing. <br />
-                    <span className="text-brand-teal">Before You Sign It.</span>
-                </h1>
-                <p className="text-xl text-brand-slate mb-8">
-                    Upload any contract. Get instant risk scores, red flags, safer alternatives,
-                    and a negotiation brief — powered by AI, built for humans.
-                </p>
+        <div className="max-w-6xl mx-auto pt-8">
+            {/* Hero + Upload — Side by Side on Desktop */}
+            <div className="grid lg:grid-cols-5 gap-10 mb-12">
+                {/* Left: Headline */}
+                <div className="lg:col-span-2 flex flex-col justify-center">
+                    <div className="inline-flex items-center gap-2 bg-brand-teal/10 text-brand-teal text-xs font-semibold px-4 py-1.5 rounded-full w-fit mb-5">
+                        <Zap size={13} />
+                        AI-Powered Legal Analysis
+                    </div>
+                    <h1 className="text-4xl lg:text-5xl font-extrabold text-brand-navy leading-tight mb-4">
+                        Know What You're Signing.
+                        <span className="text-brand-teal block mt-1">Before You Sign It.</span>
+                    </h1>
+                    <p className="text-base text-brand-slate leading-relaxed mb-8">
+                        Upload any contract and get instant risk scores, red flags, safer
+                        alternatives, and a negotiation brief — in seconds.
+                    </p>
+
+                    {/* Trust Chips */}
+                    <div className="flex flex-wrap gap-3">
+                        <div className="flex items-center gap-2 text-sm text-brand-slate bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm">
+                            <Lock size={13} className="text-brand-teal" />
+                            End-to-end encrypted
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-brand-slate bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm">
+                            <BarChart3 size={13} className="text-brand-blue" />
+                            5-dim risk scoring
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right: Upload Card */}
+                <div className="lg:col-span-3 bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                    <UploadZone />
+                </div>
             </div>
 
-            <div className="w-full max-w-2xl bg-white rounded-xl shadow-xl p-8 mb-16 animate-in zoom-in-95 duration-500 delay-150 fill-mode-both border border-gray-100">
-                <UploadZone />
+            {/* Feature Pills */}
+            <div className="grid lg:grid-cols-3 gap-5 mb-8">
+                <FeatureCard
+                    icon={<ShieldAlert size={20} />}
+                    iconBg="bg-blue-50 text-brand-blue"
+                    title="Spot Hidden Risks"
+                    desc="Detects one-sided clauses, missing protections, and unusual penalties."
+                />
+                <FeatureCard
+                    icon={<Scale size={20} />}
+                    iconBg="bg-teal-50 text-brand-teal"
+                    title="Fair Alternatives"
+                    desc="Get instant, equitable clause rewrites you can pitch to the other side."
+                />
+                <FeatureCard
+                    icon={<FileText size={20} />}
+                    iconBg="bg-purple-50 text-purple-600"
+                    title="Negotiation Brief"
+                    desc="A ready-to-use action plan on exactly what to say to reduce exposure."
+                />
             </div>
 
+            {/* History */}
             {history.length > 0 && (
-                <div className="w-full max-w-3xl mb-16 animate-in fade-in transition-all">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-brand-navy flex items-center gap-2">
-                            <History size={24} className="text-brand-teal" />
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50 bg-gray-50/50">
+                        <h3 className="text-base font-bold text-brand-navy flex items-center gap-2">
+                            <History size={18} className="text-brand-teal" />
                             Recent Analyses
-                        </h2>
-                        <button onClick={clearHistory} className="text-sm text-brand-red flex items-center gap-1 hover:underline">
-                            <Trash2 size={16} /> Clear History
+                        </h3>
+                        <button onClick={clearHistory} className="text-sm text-brand-red/70 hover:text-brand-red flex items-center gap-1.5 transition-colors">
+                            <Trash2 size={14} />
+                            Clear
                         </button>
                     </div>
-                    <div className="grid gap-3">
+                    <div className="divide-y divide-gray-50">
                         {history.map((item, idx) => (
                             <div
                                 key={idx}
                                 onClick={() => navigate(`/analysis/${item.id}`)}
-                                className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:border-brand-blue hover:shadow-md transition-all group"
+                                className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-blue-50/30 transition-colors group"
                             >
-                                <div>
-                                    <h3 className="font-bold text-brand-navy">{item.filename}</h3>
-                                    <p className="text-sm text-brand-slate">{item.contract_type} • Score: {item.overall_score}</p>
+                                <div className="flex items-center gap-4 min-w-0">
+                                    <div className={`text-sm font-bold px-2.5 py-1.5 rounded-lg ${getRiskColor(item.overall_score)}`}>
+                                        {item.overall_score}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-brand-navy truncate">{item.filename}</p>
+                                        <p className="text-xs text-brand-slate mt-0.5">{item.contract_type}</p>
+                                    </div>
                                 </div>
-                                <ChevronRight className="text-gray-300 group-hover:text-brand-blue transition-colors" />
+                                <ChevronRight size={16} className="text-gray-300 group-hover:text-brand-blue transition-colors shrink-0" />
                             </div>
                         ))}
                     </div>
                 </div>
             )}
-
-            <div className="grid md:grid-cols-3 gap-8 w-full max-w-5xl">
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-50 flex flex-col items-center text-center">
-                    <div className="bg-blue-100 p-3 rounded-full text-brand-blue mb-4">
-                        <ShieldAlert size={32} />
-                    </div>
-                    <h3 className="font-bold text-lg text-brand-navy mb-2">Spot Hidden Risks</h3>
-                    <p className="text-brand-slate text-sm">Our AI detects one-sided clauses, missing standard protections, and unusual penalties within seconds.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-50 flex flex-col items-center text-center">
-                    <div className="bg-teal-100 p-3 rounded-full text-brand-teal mb-4">
-                        <Scale size={32} />
-                    </div>
-                    <h3 className="font-bold text-lg text-brand-navy mb-2">Fair Alternatives</h3>
-                    <p className="text-brand-slate text-sm">Don't just find problems. Get instant, equitable clause rewrites you can pitch to the other side.</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-50 flex flex-col items-center text-center">
-                    <div className="bg-purple-100 p-3 rounded-full text-brand-purple mb-4">
-                        <FileText size={32} />
-                    </div>
-                    <h3 className="font-bold text-lg text-brand-navy mb-2">Negotiation Brief</h3>
-                    <p className="text-brand-slate text-sm">A ready-to-use action plan on exactly what to say to counterparty to reduce your exposure.</p>
-                </div>
-            </div>
         </div>
     );
 };
+
+/* Small reusable feature card */
+const FeatureCard = ({ icon, iconBg, title, desc }: { icon: React.ReactNode; iconBg: string; title: string; desc: string }) => (
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start gap-4 hover:shadow-md hover:border-gray-200 transition-all group">
+        <div className={`p-2.5 rounded-xl shrink-0 ${iconBg} group-hover:scale-110 transition-transform`}>
+            {icon}
+        </div>
+        <div>
+            <h3 className="text-base font-bold text-brand-navy mb-1">{title}</h3>
+            <p className="text-sm text-brand-slate leading-relaxed">{desc}</p>
+        </div>
+    </div>
+);
 
 export default HomePage;

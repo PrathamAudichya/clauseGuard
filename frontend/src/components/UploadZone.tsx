@@ -122,7 +122,7 @@ const UploadZone: React.FC = () => {
     <div className="w-full">
       <div
         className={clsx(
-          "w-full border-2 border-dashed rounded-xl p-8 transition-all duration-300 flex flex-col items-center justify-center min-h-[300px] cursor-pointer relative overflow-hidden",
+          "w-full border-2 border-dashed rounded-xl p-6 transition-all duration-300 flex flex-col items-center justify-center min-h-[260px] cursor-pointer relative overflow-hidden",
           isDragging ? "border-brand-teal bg-teal-50" : "border-gray-300 hover:border-brand-blue hover:bg-blue-50/30",
           isUploading ? "pointer-events-none" : ""
         )}
