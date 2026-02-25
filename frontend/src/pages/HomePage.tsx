@@ -122,7 +122,20 @@ const HomePage: React.FC = () => {
                                         <p className="text-xs text-brand-slate mt-0.5">{item.contract_type}</p>
                                     </div>
                                 </div>
-                                <ChevronRight size={16} className="text-gray-300 group-hover:text-brand-blue transition-colors shrink-0" />
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            localStorage.removeItem(`analysis_${item.id}`);
+                                            loadHistory();
+                                        }}
+                                        className="p-1.5 rounded-lg text-gray-400 hover:text-brand-red hover:bg-red-50 transition-all"
+                                        title="Delete this analysis"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                    <ChevronRight size={16} className="text-gray-300 group-hover:text-brand-blue transition-colors" />
+                                </div>
                             </div>
                         ))}
                     </div>
