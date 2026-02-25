@@ -90,3 +90,4 @@ If you prefer to run the frontend and backend manually without Docker, follow th
 
 - **"Backend not reachable" in Web UI:** This usually means the FastAPI frontend didn't start properly, or you are running the frontend but forgot to start the backend. The UI will gracefully fallback and offer a **Demo Mode**.
 - **Missing Gemini API Key Error:** If your `.env` or exported variables aren't picked up, ensure you export the variable *in the exact same terminal window* where you start the backend (or run `docker compose`).
+
