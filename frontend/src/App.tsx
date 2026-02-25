@@ -10,7 +10,7 @@ function Navbar() {
 
   return (
     <nav className="sticky top-3 z-50 mx-auto max-w-3xl px-3">
-      <div className="bg-brand-navy/90 backdrop-blur-xl text-white rounded-full px-4 py-2.5 shadow-lg shadow-brand-navy/20 border border-white/10 flex items-center justify-between">
+      <div className="bg-white/80 backdrop-blur-xl text-brand-navy rounded-full px-4 py-2.5 shadow-lg shadow-gray-200/50 border border-gray-200/60 flex items-center justify-between">
         {/* Logo */}
         <NavLink to="/" className="flex items-center gap-2.5 pl-1 group shrink-0">
           <div className="bg-brand-teal/20 p-1.5 rounded-full group-hover:bg-brand-teal/30 transition-colors">
@@ -22,14 +22,14 @@ function Navbar() {
         </NavLink>
 
         {/* Center Pill Nav */}
-        <div className="flex items-center gap-1 bg-white/5 rounded-full px-1.5 py-1">
+        <div className="flex items-center gap-1 bg-gray-100/80 rounded-full px-1.5 py-1">
           <NavLink
             to="/"
             end
             className={({ isActive }) =>
               `flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${isActive
                 ? 'bg-brand-teal text-white shadow-sm shadow-brand-teal/40'
-                : 'text-white/60 hover:text-white hover:bg-white/10'
+                : 'text-brand-slate/60 hover:text-brand-navy hover:bg-gray-100'
               }`
             }
           >
@@ -41,7 +41,7 @@ function Navbar() {
             className={({ isActive }) =>
               `flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${isActive
                 ? 'bg-brand-teal text-white shadow-sm shadow-brand-teal/40'
-                : 'text-white/60 hover:text-white hover:bg-white/10'
+                : 'text-brand-slate/60 hover:text-brand-navy hover:bg-gray-100'
               }`
             }
           >
@@ -57,7 +57,7 @@ function Navbar() {
         </div>
 
         {/* AI Status Chip */}
-        <div className="flex items-center gap-2 text-xs text-white/50 bg-white/5 px-3 py-1.5 rounded-full mr-1 shrink-0">
+        <div className="flex items-center gap-2 text-xs text-brand-slate/60 bg-gray-100/80 px-3 py-1.5 rounded-full mr-1 shrink-0">
           <Sparkles size={12} className="text-brand-teal" />
           <span className="hidden sm:inline">AI Ready</span>
           <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
