@@ -5,7 +5,16 @@ import ClauseList from '../components/ClauseList';
 import RedFlagPanel from '../components/RedFlagPanel';
 import NegoBrief from '../components/NegoBrief';
 import ReportExport from '../components/ReportExport';
-import { ArrowLeft, ShieldCheck, AlertTriangle, Search, Filter } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, AlertTriangle, Search, Filter, BarChart3, FileText, Handshake, Flag } from 'lucide-react';
+
+type TabId = 'overview' | 'clauses' | 'negotiation' | 'flags';
+
+const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
+    { id: 'overview', label: 'Overview', icon: <BarChart3 size={16} /> },
+    { id: 'clauses', label: 'Clauses', icon: <FileText size={16} /> },
+    { id: 'negotiation', label: 'Negotiation', icon: <Handshake size={16} /> },
+    { id: 'flags', label: 'Red Flags', icon: <Flag size={16} /> },
+];
 
 const AnalysisPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -14,13 +23,13 @@ const AnalysisPage: React.FC = () => {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<TabId>('overview');
 
     // Filter & Search states
     const [searchTerm, setSearchTerm] = useState('');
     const [riskFilter, setRiskFilter] = useState('All');
 
     useEffect(() => {
-        // For demo purposes, we load from localStorage or use a hardcoded demo object
         const isDemo = searchParams.get('demo') === 'true';
 
         setTimeout(() => {
@@ -126,122 +135,180 @@ const AnalysisPage: React.FC = () => {
     }
 
     const getVerdictLabel = (score: number) => {
-        if (score < 40) return { text: 'LOW RISK', color: 'bg-brand-green' };
-        if (score < 70) return { text: 'MODERATE RISK', color: 'bg-brand-amber' };
-        return { text: 'HIGH RISK', color: 'bg-brand-red' };
+        if (score < 40) return { text: 'LOW RISK', color: 'bg-brand-green', textColor: 'text-brand-green' };
+        if (score < 70) return { text: 'MODERATE RISK', color: 'bg-brand-amber', textColor: 'text-brand-amber' };
+        return { text: 'HIGH RISK', color: 'bg-brand-red', textColor: 'text-brand-red' };
     };
 
     const verdict = getVerdictLabel(data.overall_score);
+    const highRiskCount = data.clauses.filter((c: any) => c.risk_level === 'Critical' || c.risk_level === 'High').length;
 
     return (
         <div className="flex flex-col gap-6 animate-in fade-in duration-500">
             {/* Top Header */}
             <div className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => navigate('/')} className="text-brand-slate hover:text-brand-navy transition-colors">
-                        <ArrowLeft size={24} />
+                    <button onClick={() => navigate('/')} className="text-brand-slate hover:text-brand-navy transition-colors p-2 hover:bg-gray-50 rounded-lg">
+                        <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <h1 className="text-xl font-bold text-brand-navy">{data.filename}</h1>
+                        <h1 className="text-lg font-bold text-brand-navy">{data.filename}</h1>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs font-semibold bg-blue-100 text-brand-blue px-2 py-1 rounded">
+                            <span className="text-xs font-semibold bg-blue-100 text-brand-blue px-2 py-0.5 rounded">
                                 {data.contract_type} ({(data.type_confidence * 100).toFixed(0)}% Match)
+                            </span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${verdict.color} text-white`}>
+                                Score: {data.overall_score}/100
                             </span>
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-4">
-                    <ReportExport data={data} />
-                </div>
+                <ReportExport data={data} />
             </div>
 
-            {/* Main Grid */}
-            <div className="grid lg:grid-cols-12 gap-6">
-                {/* Left Column (Stats & Radar) */}
-                <div className="lg:col-span-4 flex flex-col gap-6">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col items-center relative overflow-hidden">
-                        <div className={`absolute top-0 left-0 w-full h-2 ${verdict.color}`}></div>
-                        <h2 className="text-sm font-bold text-brand-slate uppercase tracking-wider mt-2 mb-4">Overall Verdict</h2>
-
-                        <div className="relative w-40 h-40 flex items-center justify-center mb-4">
-                            <svg className="w-full h-full transform -rotate-90">
-                                <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-gray-100" />
-                                <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent"
-                                    strokeDasharray="439.8" strokeDashoffset={439.8 - (439.8 * data.overall_score) / 100}
-                                    className={`${data.overall_score >= 70 ? 'text-brand-red' : data.overall_score >= 40 ? 'text-brand-amber' : 'text-brand-green'} transition-all duration-1000 ease-out`} />
-                            </svg>
-                            <div className="absolute flex flex-col items-center">
-                                <span className="text-4xl font-black text-brand-navy">{data.overall_score}</span>
-                                <span className="text-xs text-brand-slate font-medium">/ 100</span>
-                            </div>
-                        </div>
-
-                        <div className={`px-4 py-1.5 rounded-full font-bold text-white text-sm tracking-wide ${verdict.color} animate-pulse`}>
-                            {verdict.text}
-                        </div>
-                    </div>
-
-                    <RiskDashboard data={data} />
-                    <RedFlagPanel alerts={data.compliance_flags} highRisks={data.clauses.filter((c: any) => c.risk_score >= 80)} />
+            {/* Tabs */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="flex border-b border-gray-100">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`flex items-center gap-2 px-6 py-3.5 text-sm font-semibold border-b-2 transition-all duration-200 ${activeTab === tab.id
+                                    ? 'border-brand-teal text-brand-teal bg-teal-50/50'
+                                    : 'border-transparent text-brand-slate hover:text-brand-navy hover:bg-gray-50'
+                                }`}
+                        >
+                            {tab.icon}
+                            {tab.label}
+                            {tab.id === 'clauses' && (
+                                <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full ml-1">
+                                    {data.clauses.length}
+                                </span>
+                            )}
+                            {tab.id === 'flags' && highRiskCount > 0 && (
+                                <span className="text-xs bg-red-100 text-brand-red px-1.5 py-0.5 rounded-full ml-1">
+                                    {highRiskCount}
+                                </span>
+                            )}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Right Column (Summary & Clause List) */}
-                <div className="lg:col-span-8 flex flex-col gap-6">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h2 className="text-lg font-bold text-brand-navy flex items-center gap-2 mb-4">
-                            <ShieldCheck className="text-brand-teal" />
-                            What You Are Agreeing To (Plain English)
-                        </h2>
-                        <ul className="space-y-2">
-                            {data.summary.map((point: string, idx: number) => (
-                                <li key={idx} className="flex gap-3 text-brand-slate">
-                                    <span className="text-brand-teal font-bold">•</span>
-                                    <span>{point}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                {/* Tab Content */}
+                <div className="p-6 animate-in fade-in duration-300" key={activeTab}>
 
-                    {data.negotiation_brief.length > 0 && (
-                        <NegoBrief brief={data.negotiation_brief} />
-                    )}
-
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[700px]">
-                        <div className="p-4 border-b border-gray-100 bg-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <h2 className="font-bold text-brand-navy whitespace-nowrap">Clause Analysis ({filteredClauses.length})</h2>
-
-                            <div className="flex items-center gap-3">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                    <input
-                                        type="text"
-                                        placeholder="Search clauses..."
-                                        className="pl-9 pr-4 py-1.5 border border-gray-200 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                    />
+                    {/* === OVERVIEW TAB === */}
+                    {activeTab === 'overview' && (
+                        <div className="grid lg:grid-cols-2 gap-6">
+                            {/* Left: Score + Verdict */}
+                            <div className="flex flex-col gap-6">
+                                <div className="bg-gray-50 rounded-xl p-6 flex flex-col items-center">
+                                    <h3 className="text-sm font-bold text-brand-slate uppercase tracking-wider mb-4">Overall Verdict</h3>
+                                    <div className="relative w-36 h-36 flex items-center justify-center mb-4">
+                                        <svg className="w-full h-full transform -rotate-90">
+                                            <circle cx="72" cy="72" r="62" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-gray-200" />
+                                            <circle cx="72" cy="72" r="62" stroke="currentColor" strokeWidth="10" fill="transparent"
+                                                strokeDasharray="389.6" strokeDashoffset={389.6 - (389.6 * data.overall_score) / 100}
+                                                strokeLinecap="round"
+                                                className={`${data.overall_score >= 70 ? 'text-brand-red' : data.overall_score >= 40 ? 'text-brand-amber' : 'text-brand-green'} transition-all duration-1000 ease-out`} />
+                                        </svg>
+                                        <div className="absolute flex flex-col items-center">
+                                            <span className="text-3xl font-black text-brand-navy">{data.overall_score}</span>
+                                            <span className="text-xs text-brand-slate font-medium">/ 100</span>
+                                        </div>
+                                    </div>
+                                    <div className={`px-4 py-1.5 rounded-full font-bold text-white text-sm ${verdict.color}`}>
+                                        {verdict.text}
+                                    </div>
                                 </div>
-                                <div className="relative">
-                                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                    <select
-                                        className="pl-9 pr-8 py-1.5 border border-gray-200 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue/50 appearance-none"
-                                        value={riskFilter}
-                                        onChange={(e) => setRiskFilter(e.target.value)}
-                                    >
-                                        <option value="All">All Risks</option>
-                                        <option value="Critical">Critical</option>
-                                        <option value="High">High</option>
-                                        <option value="Medium">Medium</option>
-                                        <option value="Low">Low</option>
-                                    </select>
+
+                                <RiskDashboard data={data} />
+                            </div>
+
+                            {/* Right: Summary */}
+                            <div className="flex flex-col gap-6">
+                                <div className="bg-gray-50 rounded-xl p-6">
+                                    <h3 className="text-sm font-bold text-brand-navy flex items-center gap-2 mb-4">
+                                        <ShieldCheck className="text-brand-teal" size={18} />
+                                        What You Are Agreeing To
+                                    </h3>
+                                    <ul className="space-y-3">
+                                        {data.summary.map((point: string, idx: number) => (
+                                            <li key={idx} className="flex gap-3 text-sm text-brand-slate leading-relaxed">
+                                                <span className="text-brand-teal font-bold mt-0.5 shrink-0">•</span>
+                                                <span>{point}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Quick Stats */}
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="bg-red-50 rounded-xl p-4 text-center">
+                                        <div className="text-2xl font-black text-brand-red">
+                                            {data.clauses.filter((c: any) => c.risk_level === 'Critical').length}
+                                        </div>
+                                        <div className="text-xs font-semibold text-brand-red/70 mt-1">Critical</div>
+                                    </div>
+                                    <div className="bg-orange-50 rounded-xl p-4 text-center">
+                                        <div className="text-2xl font-black text-orange-600">
+                                            {data.clauses.filter((c: any) => c.risk_level === 'High').length}
+                                        </div>
+                                        <div className="text-xs font-semibold text-orange-600/70 mt-1">High Risk</div>
+                                    </div>
+                                    <div className="bg-green-50 rounded-xl p-4 text-center">
+                                        <div className="text-2xl font-black text-brand-green">
+                                            {data.clauses.filter((c: any) => c.risk_level === 'Low').length}
+                                        </div>
+                                        <div className="text-xs font-semibold text-brand-green/70 mt-1">Low Risk</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex-1 overflow-auto p-4 bg-gray-50/50">
+                    )}
+
+                    {/* === CLAUSES TAB === */}
+                    {activeTab === 'clauses' && (
+                        <div className="flex flex-col gap-4">
+                            {/* Search & Filter Bar */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-gray-100">
+                                <h3 className="font-bold text-brand-navy">
+                                    Clause-by-Clause Analysis
+                                    <span className="text-brand-slate font-normal text-sm ml-2">({filteredClauses.length} of {data.clauses.length})</span>
+                                </h3>
+                                <div className="flex items-center gap-3">
+                                    <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+                                        <input
+                                            type="text"
+                                            placeholder="Search clauses..."
+                                            className="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/50 w-48"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className="relative">
+                                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+                                        <select
+                                            className="pl-9 pr-8 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue/50 appearance-none"
+                                            value={riskFilter}
+                                            onChange={(e) => setRiskFilter(e.target.value)}
+                                        >
+                                            <option value="All">All Risks</option>
+                                            <option value="Critical">Critical</option>
+                                            <option value="High">High</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="Low">Low</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Clause Cards */}
                             {filteredClauses.length > 0 ? (
                                 <ClauseList clauses={filteredClauses} searchTerm={searchTerm} />
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-full text-brand-slate">
+                                <div className="flex flex-col items-center justify-center py-16 text-brand-slate">
                                     <p>No clauses match your current filters.</p>
                                     <button
                                         onClick={() => { setSearchTerm(''); setRiskFilter('All'); }}
@@ -252,7 +319,32 @@ const AnalysisPage: React.FC = () => {
                                 </div>
                             )}
                         </div>
-                    </div>
+                    )}
+
+                    {/* === NEGOTIATION TAB === */}
+                    {activeTab === 'negotiation' && (
+                        <div>
+                            {data.negotiation_brief.length > 0 ? (
+                                <NegoBrief brief={data.negotiation_brief} />
+                            ) : (
+                                <div className="text-center py-16 text-brand-slate">
+                                    <Handshake className="mx-auto mb-4 text-gray-300" size={48} />
+                                    <p className="text-lg font-medium">No negotiation points found.</p>
+                                    <p className="text-sm mt-1">This contract seems fair — no high-risk clauses were flagged.</p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* === RED FLAGS TAB === */}
+                    {activeTab === 'flags' && (
+                        <div>
+                            <RedFlagPanel
+                                alerts={data.compliance_flags}
+                                highRisks={data.clauses.filter((c: any) => c.risk_score >= 80)}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
