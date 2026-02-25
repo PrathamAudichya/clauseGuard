@@ -100,13 +100,20 @@ def derive_negotiation_brief_and_flags(clauses: List[dict]) -> tuple[List[dict],
     return briefs, flags
 
 async def analyze_clauses(clauses: List[str], contract_type: str, full_text: str) -> Dict[str, Any]:
-    # Process clauses with Gemini concurrently
-    # Batch them if there are too many, but for demo up to 20 should be fine concurrently
-    # Or just use asyncio.gather for all
-    tasks = [analyze_single_clause(c, contract_type) for c in clauses[:30]] # Limit to 30 clauses for speed and API limits
-    
-    # Run all clause analysis in parallel
-    analyzed_clauses = await asyncio.gather(*tasks)
+    # Process clauses in small batches with delays to avoid 429 rate limit errors
+    # Free tier: ~5 requests/minute for gemini-2.5-flash
+    analyzed_clauses = []
+    batch_size = 4
+    delay_between_batches = 15  # seconds
+
+    limited_clauses = clauses[:20]
+    for i in range(0, len(limited_clauses), batch_size):
+        batch = limited_clauses[i:i + batch_size]
+        tasks = [analyze_single_clause(c, contract_type) for c in batch]
+        results = await asyncio.gather(*tasks)
+        analyzed_clauses.extend(results)
+        if i + batch_size < len(limited_clauses):
+            await asyncio.sleep(delay_between_batches)
     
     # Calculate overall score
     if not analyzed_clauses:
