@@ -122,8 +122,8 @@ const UploadZone: React.FC = () => {
     <div className="w-full">
       <div
         className={clsx(
-          "w-full border-2 border-dashed rounded-xl p-6 transition-all duration-300 flex flex-col items-center justify-center min-h-[260px] cursor-pointer relative overflow-hidden",
-          isDragging ? "border-brand-teal bg-teal-50" : "border-gray-300 hover:border-brand-blue hover:bg-blue-50/30",
+          "relative flex min-h-[280px] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed p-6 transition-all duration-300",
+          isDragging ? "border-brand-teal bg-brand-teal/5" : "border-white/10 bg-surface-200/35 hover:border-brand-teal/40 hover:bg-brand-teal/5",
           isUploading ? "pointer-events-none" : ""
         )}
         onDragEnter={handleDrag}
@@ -142,18 +142,18 @@ const UploadZone: React.FC = () => {
 
         {stage === 'Upload' && !file && (
           <div className="flex flex-col items-center text-center animate-in fade-in duration-500">
-            <div className="bg-blue-50 p-4 rounded-full mb-4 text-brand-blue group-hover:scale-110 transition-transform">
+            <div className="mb-4 rounded-2xl bg-brand-teal/10 p-4 text-brand-teal">
               <UploadCloud size={48} strokeWidth={1.5} />
             </div>
-            <h3 className="text-xl font-bold text-brand-navy mb-2">Drag & Drop Contract</h3>
+            <h3 className="text-xl font-bold text-white mb-2">Drag & Drop Contract</h3>
             <p className="text-brand-slate text-sm">Or click to browse (PDF, DOCX up to 10MB)</p>
-            <p className="mt-6 text-xs text-brand-slate max-w-sm mx-auto">
-              Your documents are encrypted and never used to train our models. Supported formats: .pdf, .docx (Max 10MB)
+            <p className="mt-6 text-xs text-brand-slate/50 max-w-sm mx-auto">
+              Your documents are encrypted and never used to train our models.
             </p>
 
             <button
               onClick={(e) => { e.stopPropagation(); navigate('/compare'); }}
-              className="mt-6 text-sm font-semibold text-brand-blue hover:text-brand-navy flex items-center justify-center gap-2 mx-auto transition-colors px-4 py-2 rounded-full hover:bg-blue-50"
+              className="mt-6 mx-auto flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-brand-teal transition-colors hover:bg-white/[0.06] hover:text-white"
             >
               Have a negotiated version? Compare contracts here &rarr;
             </button>
@@ -162,45 +162,45 @@ const UploadZone: React.FC = () => {
 
         {stage === 'Analyzing' && (
           <div className="flex flex-col items-center w-full max-w-md">
-            <Loader2 size={48} className="text-brand-blue animate-spin mb-6" />
-            <h3 className="text-xl font-bold text-brand-navy mb-2 animate-pulse">Analyzing Contract...</h3>
+            <Loader2 size={48} className="text-brand-teal animate-spin mb-6" />
+            <h3 className="text-xl font-bold text-white mb-2 animate-pulse">Analyzing Contract...</h3>
             <p className="text-brand-slate text-sm mb-6 text-center">
               Extracting clauses, identifying risks, and generating safer alternatives using AI.
             </p>
 
-            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2 overflow-hidden">
+            <div className="w-full bg-white/[0.06] rounded-full h-2.5 mb-2 overflow-hidden">
               <div
-                className="bg-brand-blue h-2.5 rounded-full transition-all duration-300 ease-out"
+                className="bg-gradient-to-r from-brand-teal to-brand-cyan h-2.5 rounded-full transition-all duration-300 ease-out shadow-lg shadow-brand-teal/20"
                 style={{ width: `${uploadProgress}%` }}
               ></div>
             </div>
-            <span className="text-sm font-semibold text-brand-blue">{uploadProgress}%</span>
+            <span className="text-sm font-semibold text-brand-teal">{uploadProgress}%</span>
           </div>
         )}
 
         {stage === 'Complete!' && (
           <div className="flex flex-col items-center animate-in zoom-in duration-300">
-            <div className="bg-teal-50 p-4 rounded-full mb-4 text-brand-teal">
+            <div className="bg-brand-teal/10 p-4 rounded-2xl mb-4 text-brand-teal">
               <CheckCircle2 size={48} />
             </div>
-            <h3 className="text-xl font-bold text-brand-navy">Analysis Complete!</h3>
+            <h3 className="text-xl font-bold text-white">Analysis Complete!</h3>
             <p className="text-brand-slate text-sm mt-2">Redirecting to your results...</p>
           </div>
         )}
 
         {file && !isUploading && (
           <div className="flex flex-col items-center animate-in fade-in zoom-in-95 w-full">
-            <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100 w-full max-w-sm mb-6">
-              <div className="bg-brand-navy text-white p-3 rounded-md">
+            <div className="mb-6 flex w-full max-w-md items-center gap-4 rounded-xl border border-white/[0.08] bg-surface-300/90 p-4">
+              <div className="bg-brand-teal text-white p-3 rounded-lg">
                 <File size={24} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-brand-navy truncate">{file.name}</p>
+                <p className="text-sm font-bold text-white truncate">{file.name}</p>
                 <p className="text-xs text-brand-slate">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
               </div>
               <button
                 onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                className="text-gray-400 hover:text-brand-red p-2"
+                className="text-brand-slate hover:text-brand-red p-2 transition-colors"
               >
                 &times;
               </button>
@@ -208,7 +208,7 @@ const UploadZone: React.FC = () => {
 
             <button
               onClick={(e) => { e.stopPropagation(); handleUpload(); }}
-              className="bg-brand-teal hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all transform hover:-translate-y-1 w-full max-w-sm text-lg"
+              className="btn-primary w-full max-w-md py-3 text-lg font-bold"
             >
               Scan For Risks
             </button>
@@ -217,7 +217,7 @@ const UploadZone: React.FC = () => {
       </div>
 
       {error && !isUploading && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg flex items-start gap-3 animate-in fade-in">
+        <div className="mt-4 p-3 bg-brand-red/10 border border-brand-red/20 rounded-lg flex items-start gap-3 animate-in fade-in">
           <AlertCircle className="text-brand-red shrink-0 mt-0.5" size={18} />
           <p className="text-sm text-brand-red">{error}</p>
         </div>

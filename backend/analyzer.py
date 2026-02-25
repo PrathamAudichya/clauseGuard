@@ -1,19 +1,18 @@
 import os
 import json
 import asyncio
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from typing import List, Dict, Any
 
 # Configure Gemini with the API Key
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-else:
+if not GEMINI_API_KEY:
     print("WARNING: GEMINI_API_KEY not set. API calls will fail.")
 
-def get_gemini_model():
-    # Use gemini-2.5-flash as it's fast and suitable for this task
-    return genai.GenerativeModel('gemini-2.5-flash')
+client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
+
+MODEL = 'gemini-2.0-flash'
 
 async def analyze_single_clause(clause: str, contract_type: str) -> dict:
     prompt = f"""
@@ -32,22 +31,26 @@ Format:
   "negotiation_point": "what to ask the other side"
 }}
 """
-    model = get_gemini_model()
+    if not client:
+        return {
+            "risk_score": 0, "risk_level": "Low", "risk_category": "Legal",
+            "explanation": "API key not configured.",
+            "safer_alternative": clause, "negotiation_point": "", "original_text": clause
+        }
     try:
-        # Using generate_content_async for concurrent execution
-        response = await model.generate_content_async(
-            prompt,
-            generation_config=genai.GenerationConfig(
+        response = await client.aio.models.generate_content(
+            model=MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 response_mime_type="application/json",
-                temperature=0.1
-            )
+                temperature=0.1,
+            ),
         )
         data = json.loads(response.text)
         data["original_text"] = clause
         return data
     except Exception as e:
         print(f"Error analyzing clause: {e}")
-        # Return a fallback neutral score on error to prevent total failure
         return {
             "risk_score": 0,
             "risk_level": "Low",
@@ -63,16 +66,18 @@ async def generate_summary(full_text: str, contract_type: str) -> List[str]:
 Summarize this {contract_type} contract into exactly 5 plain English bullet points for a non-lawyer. 
 Return ONLY a valid JSON string containing an array of strings, e.g. ["Point 1", "Point 2"].
 Contract Text:
-{full_text[:30000]} # Truncated to avoid token limits if too large
+{full_text[:30000]}
 """
-    model = get_gemini_model()
+    if not client:
+        return ["API key not configured."]
     try:
-        response = await model.generate_content_async(
-            prompt,
-             generation_config=genai.GenerationConfig(
+        response = await client.aio.models.generate_content(
+            model=MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 response_mime_type="application/json",
-                temperature=0.2
-            )
+                temperature=0.2,
+            ),
         )
         data = json.loads(response.text)
         if isinstance(data, list):

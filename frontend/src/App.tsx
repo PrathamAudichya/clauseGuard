@@ -9,58 +9,61 @@ function Navbar() {
   const isAnalysisPage = location.pathname.startsWith('/analysis');
 
   return (
-    <nav className="sticky top-3 z-50 mx-auto max-w-3xl px-3">
-      <div className="bg-white/80 backdrop-blur-xl text-brand-navy rounded-full px-4 py-2.5 shadow-lg shadow-gray-200/50 border border-gray-200/60 flex items-center justify-between">
-        {/* Logo */}
-        <NavLink to="/" className="flex items-center gap-2.5 pl-1 group shrink-0">
-          <div className="bg-brand-teal/20 p-1.5 rounded-full group-hover:bg-brand-teal/30 transition-colors">
-            <Shield size={18} className="text-brand-teal" />
-          </div>
-          <span className="text-base font-bold tracking-wide hidden sm:inline">
-            <span className="text-brand-teal">Clause</span>Guard
-          </span>
-        </NavLink>
-
-        {/* Center Pill Nav */}
-        <div className="flex items-center gap-1 bg-gray-100/80 rounded-full px-1.5 py-1">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              `flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${isActive
-                ? 'bg-brand-teal text-white shadow-sm shadow-brand-teal/40'
-                : 'text-brand-slate/60 hover:text-brand-navy hover:bg-gray-100'
-              }`
-            }
-          >
-            <Home size={15} />
-            Scan
-          </NavLink>
-          <NavLink
-            to="/compare"
-            className={({ isActive }) =>
-              `flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${isActive
-                ? 'bg-brand-teal text-white shadow-sm shadow-brand-teal/40'
-                : 'text-brand-slate/60 hover:text-brand-navy hover:bg-gray-100'
-              }`
-            }
-          >
-            <GitCompareArrows size={15} />
-            Compare
-          </NavLink>
-          {isAnalysisPage && (
-            <div className="flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold bg-brand-blue text-white shadow-sm shadow-brand-blue/40">
-              <FileText size={15} />
-              Report
+    <nav className="sticky top-4 z-50 page-container">
+      <div className="glass-panel px-4 py-3 sm:px-5">
+        <div className="flex items-center gap-3 sm:gap-6">
+          <NavLink to="/" className="group flex items-center gap-2.5 shrink-0">
+            <div className="rounded-xl bg-brand-teal/15 p-2.5 text-brand-teal transition-all duration-300 group-hover:bg-brand-teal/25 group-hover:shadow-lg group-hover:shadow-brand-teal/15">
+              <Shield size={16} />
             </div>
-          )}
-        </div>
+            <span className="hidden text-base font-bold tracking-tight sm:inline">
+              <span className="text-brand-teal">Clause</span>
+              <span className="text-white">Guard</span>
+            </span>
+          </NavLink>
 
-        {/* AI Status Chip */}
-        <div className="flex items-center gap-2 text-xs text-brand-slate/60 bg-gray-100/80 px-3 py-1.5 rounded-full mr-1 shrink-0">
-          <Sparkles size={12} className="text-brand-teal" />
-          <span className="hidden sm:inline">AI Ready</span>
-          <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+          <div className="glass-subtle flex min-w-0 flex-1 items-center gap-1 p-1">
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) =>
+                `flex min-w-0 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-300 sm:px-5 ${isActive
+                  ? 'bg-brand-teal text-white shadow-lg shadow-brand-teal/20'
+                  : 'text-brand-slate hover:bg-white/[0.06] hover:text-white'
+                }`
+              }
+            >
+              <Home size={14} />
+              <span className="hidden sm:inline">Scan</span>
+            </NavLink>
+            <NavLink
+              to="/compare"
+              className={({ isActive }) =>
+                `flex min-w-0 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-300 sm:px-5 ${isActive
+                  ? 'bg-brand-teal text-white shadow-lg shadow-brand-teal/20'
+                  : 'text-brand-slate hover:bg-white/[0.06] hover:text-white'
+                }`
+              }
+            >
+              <GitCompareArrows size={14} />
+              <span className="hidden sm:inline">Compare</span>
+            </NavLink>
+            {isAnalysisPage && (
+              <div className="ml-auto flex items-center gap-2 rounded-lg bg-brand-blue/90 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-brand-blue/20 sm:px-5">
+                <FileText size={14} />
+                <span className="hidden sm:inline">Report</span>
+              </div>
+            )}
+          </div>
+
+          <div className="hidden items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3.5 py-2 text-xs font-medium text-brand-slate lg:flex">
+            <Sparkles size={12} className="text-brand-teal" />
+            AI Ready
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-teal opacity-60"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-teal"></span>
+            </span>
+          </div>
         </div>
       </div>
     </nav>
@@ -70,9 +73,14 @@ function Navbar() {
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-light text-slate">
+      <div className="app-shell">
+        <div className="ambient-canvas">
+          <div className="ambient-orb -top-28 left-1/4 h-72 w-72 bg-brand-teal/20" />
+          <div className="ambient-orb top-40 -right-20 h-80 w-80 bg-brand-blue/20" />
+          <div className="ambient-orb -bottom-24 left-10 h-72 w-72 bg-brand-purple/20" />
+        </div>
         <Navbar />
-        <main className="container mx-auto px-6 md:px-10 pt-8 pb-12">
+        <main className="page-container pb-16 pt-8 sm:pt-10">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/analysis/:id" element={<AnalysisPage />} />
