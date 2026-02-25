@@ -16,10 +16,11 @@ Welcome to ClauseGuard! This guide will help you get the project up and running 
 The easiest way to run the application is using Docker. It handles all backend dependencies (including heavy machine learning libraries) and frontend builds automatically.
 
 1. **Set your API Key:**
-   Export your Gemini API key in your terminal before running Docker Compose:
+   Copy the example env file and add your key:
    ```bash
-   export GEMINI_API_KEY="your_api_key_here"
+   cp .env.example .env
    ```
+   Then open `.env` in any text editor and replace `your_api_key_here` with your actual Gemini API key.
 
 2. **Start the Application:**
    Run the following command from the root directory of the project:
