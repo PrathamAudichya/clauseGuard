@@ -146,3 +146,7 @@ venv.bak/
 uploads/
 backend/uploads/
 test.pdf
+
+# Pyre (Facebook static type checker) — machine-specific, never commit
+.pyre_configuration
+.pyre/
